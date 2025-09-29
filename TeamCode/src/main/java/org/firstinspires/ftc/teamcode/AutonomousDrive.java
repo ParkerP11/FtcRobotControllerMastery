@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
@@ -45,6 +46,8 @@ public class AutonomousDrive {
 
     private final double MAX_MOTOR_CURRENT = 9.2;
     private final double DEAD_WHEEL_RADIUS_MM = 16;
+
+    public final double STRAFE_RATIO = 1;
     //PID controls
 
     //For Drive Movement
@@ -54,6 +57,7 @@ public class AutonomousDrive {
     public  double errorSumDX = 0;
     public double errorSumDY = 0;
     public double errorSumRangeD = 5;
+
 
     //For Turn Movement
     public  double kTP = 0.25;
@@ -183,11 +187,11 @@ public class AutonomousDrive {
         controlHub = (LynxModule) opMode.hardwareMap.get(LynxModule.class, "Control Hub");
         expansionHub = (LynxModule) opMode.hardwareMap.get(LynxModule.class, "Expansion Hub");
 
-        lf = opMode.hardwareMap.get(DcMotorEx.class, leftFrontName);
-        lb = opMode.hardwareMap.get(DcMotorEx.class, leftBackName);
-        rf = opMode.hardwareMap.get(DcMotorEx.class, rightFrontName);
-        rb = opMode.hardwareMap.get(DcMotorEx.class, rightBackName);
-
+        lf = Robot.lf;
+        lb = Robot.lb;
+        rf = Robot.rf;
+        rb = Robot.rb;
+        /*
         leftFrontNum = lf.getPortNumber();
         leftBackNum = lb.getPortNumber();
         rightFrontNum = rf.getPortNumber();
@@ -201,6 +205,9 @@ public class AutonomousDrive {
         motorControllerEx.setMotorCurrentAlert(leftBackNum, MAX_MOTOR_CURRENT, CurrentUnit.AMPS);
         motorControllerEx.setMotorCurrentAlert(rightFrontNum, MAX_MOTOR_CURRENT, CurrentUnit.AMPS);
         motorControllerEx.setMotorCurrentAlert(rightBackNum, MAX_MOTOR_CURRENT, CurrentUnit.AMPS);
+
+         */
+
 
         odo = opMode.hardwareMap.get(GoBildaPinpointDriver.class, odoName);
 
@@ -217,6 +224,7 @@ public class AutonomousDrive {
 
         odo.setPosition(new Pose2D(DistanceUnit.INCH, masterStartPoses[startPos][1],masterStartPoses[startPos][0], AngleUnit.DEGREES, masterStartPoses[startPos][0]));
         opMode.sleep(100);
+
     }
 
     public void updateTelemetry(){
@@ -382,6 +390,8 @@ public class AutonomousDrive {
         }
     }
 
+
+
     public double turnSlope(double targetHeading, double startHeading, double currentDist, double startDist){
         return ((startHeading-targetHeading)/startDist) * (currentDist - startDist) + startHeading;
     }
@@ -479,7 +489,7 @@ public class AutonomousDrive {
             double rotX = x * Math.cos(-currentHeadingRad) - y * Math.sin(-currentHeadingRad);
             double rotY = x * Math.sin(-currentHeadingRad) + y * Math.cos(-currentHeadingRad);
 
-            rotX = rotX * 1.1;  // Counteract imperfect strafing
+            rotX = rotX * STRAFE_RATIO;  // Counteract imperfect strafing
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
@@ -544,7 +554,7 @@ public class AutonomousDrive {
             double rotX = x * Math.cos(-currentHeadingRad) - y * Math.sin(-currentHeadingRad);
             double rotY = x * Math.sin(-currentHeadingRad) + y * Math.cos(-currentHeadingRad);
 
-            rotX = rotX * 1.1;  // Counteract imperfect strafing
+            rotX = rotX * STRAFE_RATIO;  // Counteract imperfect strafing
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
@@ -609,7 +619,7 @@ public class AutonomousDrive {
             double rotX = x * Math.cos(-currentHeadingRad) - y * Math.sin(-currentHeadingRad);
             double rotY = x * Math.sin(-currentHeadingRad) + y * Math.cos(-currentHeadingRad);
 
-            rotX = rotX * 1.1;  // Counteract imperfect strafing
+            rotX = rotX * STRAFE_RATIO;  // Counteract imperfect strafing
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,

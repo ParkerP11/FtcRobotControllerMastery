@@ -14,22 +14,7 @@ public class TestPID extends LinearOpMode {
         AutonomousDrive ad = new AutonomousDrive(this, 1);
         setTimeLimit(4);
         ad.setOutputInfo(true);
-        for(int i = 1; i < 10; i++){
-            for(int k = 1; k < 10; k++){
-                for (int h = 2; h < 24; h++){
-                    ad.setPID(h/2, k/10, k/10, 0);
-                    ad.goToPointConstantHeading(30, 24);
-                    sleep(1000);
-                    ad.goToHeading(270);
-                    sleep(500);
-                    ad.goToPointConstantHeading(16, 36);
-                    ad.goToHeading(180);
-                    ad.goToPointConstantHeading(8,36);
-                    sleep(500);
-
-                }
-            }
-        }
+        kI =
 
 
     }
