@@ -60,18 +60,6 @@ public class Path{
     }
 
     private Pose2D splineFunc(Pose2D point1, Pose2D point2, double weight1, double weight2,double t) {
-        t = Math.max(0,Math.min(1,t));
-        double angle1 = point1.getHeading(AngleUnit.DEGREES);
-        double angle2 = point2.getHeading(AngleUnit.DEGREES);
-
-        double x1  = (1-t)*point1.getX(DistanceUnit.INCH)+t*makeControlPoint(point1,angle1, weight1).getX(DistanceUnit.INCH);
-        double y1  = (1-t)*point1.getY(DistanceUnit.INCH)+t*makeControlPoint(point1,angle1, weight1).getY(DistanceUnit.INCH);
-
-        double x2  = (1-t)*makeControlPoint(point2,angle2+180, weight2).getX(DistanceUnit.INCH)+t*point2.getX(DistanceUnit.INCH);
-        double y2  = (1-t)*makeControlPoint(point2,angle2+180, weight2).getY(DistanceUnit.INCH)+t*point2.getY(DistanceUnit.INCH);
-
-        double x3  = (1-t)*makeControlPoint(point1,angle1, weight1).getX(DistanceUnit.INCH)+t*makeControlPoint(point2,angle2, weight2).getX(DistanceUnit.INCH);
-        double y3  = (1-t)*makeControlPoint(point1,angle1, weight1).getY(DistanceUnit.INCH)+t*makeControlPoint(point2,angle2, weight2).getY(DistanceUnit.INCH);
 
         double x4 = (1-t)*x1 + t * x3;
         double y4 = (1-t)*y1 + t * y3;
@@ -83,7 +71,19 @@ public class Path{
         double y = (1-t)*y4 + t * y5;
         double heading = (1-t)*angle1 + t * angle2;
 
-        Pose2D point = new Pose2D(DistanceUnit.INCH,x,y,AngleUnit.DEGREES,heading);
+        Pose2D point = new Pose2D(DistanceUnit.INCH,x,y,AngleUnit.DEGREES,het = Math.max(0,Math.min(1,t));
+        double angle1 = point1.getHeading(AngleUnit.DEGREES);
+        double angle2 = point2.getHeading(AngleUnit.DEGREES);
+
+        double x1  = (1-t)*point1.getX(DistanceUnit.INCH)+t*makeControlPoint(point1,angle1, weight1).getX(DistanceUnit.INCH);
+        double y1  = (1-t)*point1.getY(DistanceUnit.INCH)+t*makeControlPoint(point1,angle1, weight1).getY(DistanceUnit.INCH);
+
+        double x2  = (1-t)*makeControlPoint(point2,angle2+180, weight2).getX(DistanceUnit.INCH)+t*point2.getX(DistanceUnit.INCH);
+        double y2  = (1-t)*makeControlPoint(point2,angle2+180, weight2).getY(DistanceUnit.INCH)+t*point2.getY(DistanceUnit.INCH);
+
+        double x3  = (1-t)*makeControlPoint(point1,angle1, weight1).getX(DistanceUnit.INCH)+t*makeControlPoint(point2,angle2, weight2).getX(DistanceUnit.INCH);
+        double y3  = (1-t)*makeControlPoint(point1,angle1, weight1).getY(DistanceUnit.INCH)+t*makeControlPoint(point2,angle2, weight2).getY(DistanceUnit.INCH);
+        ading);
         return point;
 
     }
