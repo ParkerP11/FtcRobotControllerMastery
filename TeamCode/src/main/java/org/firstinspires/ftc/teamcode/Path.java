@@ -14,23 +14,23 @@ public class Path{
 
     AutonomousDrive ad;
 
-    ArrayList<Pose2D> path = new ArrayList<>();
+    ArrayList<double[]> path = new ArrayList<>();
     LinearOpMode opMode;
 
     private DistanceUnit unit = DistanceUnit.INCH;
     private AngleUnit angleUnit = AngleUnit.DEGREES;
 
-    Pose2D startPose;
+    double[] startPose;
 
 
 
-    public Path(AutonomousDrive ad, LinearOpMode opMode, Pose2D startPose, double startTangent){
+    public Path(AutonomousDrive ad, LinearOpMode opMode, double[] startPose, double startTangent){
         this.ad = ad;
         this.startPose = startPose;
 
         this.path.add(startPose);
 
-        Pose2D controlPoint1 = makeControlPoint(startPose, startTangent);
+        double[] controlPoint1 = makeControlPoint(startPose, startTangent);
 
         this.path.add(controlPoint1);
         this.opMode = opMode;
@@ -46,12 +46,14 @@ public class Path{
 
 
     public void addSpline( double x, double y,double heading, double endTangent){
-        Pose2D point2 = new Pose2D(unit, x,y,AngleUnit.DEGREES,heading);
+        double[] point2 = new double[]{x,y,heading};
 
-        Pose2D controlPoint2 = makeControlPoint(point2, endTangent);
+        double[] controlPoint2 = makeControlPoint(point2, endTangent);
+        double[] controlPoint3 = makeControlPoint(point2, endTangent + 180);
 
-        path.add(point2);
         path.add(controlPoint2);
+        path.add(point2);
+        path.add(controlPoint3);
 
     }
 
@@ -59,79 +61,60 @@ public class Path{
 
     public boolean isComplete(){
 
-        double targetXDist = ad.getX()-path.get(path.size()-1).getX(DistanceUnit.INCH);
-        double targetYDist = ad.getY()-path.get(path.size()-1).getY(DistanceUnit.INCH);
+        double targetXDist = ad.getX()-path.get(path.size()-1)[0];
+        double targetYDist = ad.getY()-path.get(path.size()-1)[1];
 
         return !(Math.abs(targetXDist) >ad.POS_ERROR_TOLERANCE2 ||  Math.abs(targetYDist) > ad.POS_ERROR_TOLERANCE2);
 
     }
-    private Pose2D pathFunc(double t){
-        int x = (int)(Math.floor(t));
-        Pose2D point = splineFunc(path.get(x), path.get(x+1), path.get(x+2), path.get(x+3),t);
+    private double[] pathFunc(double t, int index){
+        index *= 3;
+        index = Math.min(index, path.size() - 5);
+        double[] point = splineFunc(path.get(index), path.get(index+1), path.get(index+2), path.get(index+3),t);
         return point;
     }
 
-    private Pose2D splineFunc(Pose2D point1, Pose2D point2,Pose2D point3,Pose2D point4,double t) {
-        if(t % 1 == 0 && t != 0) {
-            t = 1;
-        }else{
-            t = t % 1;
-        }
+    private double[] splineFunc(double[] point1, double[] point2,double[] point3,double[] point4,double t) {
 
-        double angle1 = point1.getHeading(AngleUnit.DEGREES);
-        double angle2 = point2.getHeading(AngleUnit.DEGREES);
 
-        double x1  = blend(point1, point2, t).getX(unit);
-        double y1  = blend(point1, point2, t).getY(unit);
+        double angle1 = point1[2];
+        double angle2 = point2[2];
 
-        double x2  = blend(point2, point3, t).getX(unit);
-        double y2  = blend(point2, point3, t).getY(unit);
+        double[] p1 =  blend(point1, point2, t);
+        double[] p2 =  blend(point2, point3, t);
+        double[] p3 =  blend(point3, point4, t);
+        double[] p4 =  blend(p1, p2, t);
+        double[] p5 =  blend(p2, p3, t);
+        double[] p6 =  blend(p4, p5, t);
 
-        double x3  = blend(point3, point4, t).getX(unit);
-        double y3  = blend(point3, point4, t).getX(unit);
-
-        double x4 = (1-t)*x1 + t * x2;
-        double y4 = (1-t)*y1 + t * y2;
-
-        double x5 = (1-t)*x2 + t * x3;
-        double y5 = (1-t)*y2 + t * y3;
-
-        double x = (1-t)*x4 + t * x5;
-        double y = (1-t)*y4 + t * y5;
         double heading = (1-t)*angle1 + t * angle2;
-        Pose2D point = new Pose2D(DistanceUnit.INCH,x,y,AngleUnit.DEGREES,heading);
+        p6[2] = heading;
+        double[] point = p6;
         return point;
 
 
     }
-    private Pose2D blend(Pose2D point1, Pose2D point2,double t){
-        t = Math.max(0,Math.min(1,t));
+    private double[] blend(double[] point1, double[] point2,double t){
+        double x = (1-t)*point1[0]+t*point2[0];
+        double y = (1-t)*point1[1]+t*point2[1];
+        double heading = (1-t)*point1[2]+ t*point2[2];
 
-        double x = (1-t)*point1.getX(DistanceUnit.INCH)+t*point2.getX(DistanceUnit.INCH);
-        double y = (1-t)*point1.getY(DistanceUnit.INCH)+t*point2.getY(DistanceUnit.INCH);
-        double heading = (1-t)*point1.getHeading(AngleUnit.DEGREES)+ t*point2.getHeading(AngleUnit.DEGREES);
-
-        Pose2D point = new Pose2D(DistanceUnit.INCH,x,y,AngleUnit.DEGREES,heading);
+        double[] point = new double[]{x,y,heading};
         return point;
     }
 
-    private Pose2D makeControlPoint(Pose2D point1,double angle1){
-        double x = point1.getX(DistanceUnit.INCH) + Math.sin(Math.toRadians(angle1));
-        double y = point1.getY(DistanceUnit.INCH) -  Math.cos(Math.toRadians(angle1));;
+    private double[] makeControlPoint(double[] point1,double angle1){
+        double x = point1[0]+ Math.sin(Math.toRadians(angle1-90));
+        double y = point1[1] +  Math.cos(Math.toRadians(angle1 - 90));;
 
-        Pose2D point = new Pose2D(DistanceUnit.INCH,x,y,AngleUnit.DEGREES,point1.getHeading(AngleUnit.DEGREES));
+        double[] point = new double[]{x,y,point1[2]};
         return  point;
 
     }
-    public Pose2D getPoint(double tick){
-        if(tick >= path.size()){
-            return path.get(path.size()-1);
-        }
-        tick = Math.max(0,tick);
-        double x = pathFunc(tick).getX(DistanceUnit.INCH);
-        double y = pathFunc(tick).getY(DistanceUnit.INCH);
-        Pose2D point = new Pose2D(DistanceUnit.INCH,x,y,AngleUnit.DEGREES,path.get((int)(Math.floor(tick))).getHeading(AngleUnit.DEGREES));
-        return point;
+    public double[] getPoint(double tick){
+        int index = (int)(Math.floor(tick));
+        double t = tick - index;
+        return pathFunc(t,index);
     }
 
 

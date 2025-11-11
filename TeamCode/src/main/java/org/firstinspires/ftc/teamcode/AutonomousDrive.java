@@ -655,10 +655,9 @@ public class AutonomousDrive {
     }
 
 
-    public Path createPath(Pose2D startPose, double startTangent){
+    public void createPath(double[] startPose, double startTangent){
         Path path = new Path(this, opMode, startPose,startTangent);
         paths.add(path);
-        return path;
     }
 
     public Path getPath(int index){
@@ -672,10 +671,12 @@ public class AutonomousDrive {
         Path path = getPath(pathNum);
         double t = 0;
         while(!path.isComplete()){
-            Pose2D point = path.getPoint(t);
-            goToPointLinear(point.getX(DistanceUnit.INCH),point.getY(DistanceUnit.INCH), point.getHeading(AngleUnit.DEGREES));
-            t += 0.1;
+            double[] point = path.getPoint(t);
+            goToPointLinear(point[0],point[1], point[2]);
+            t += 0.01;
         }
+        drive(0,0,0,0);
+        opMode.sleep(50);
 
     }
 
@@ -684,8 +685,8 @@ public class AutonomousDrive {
         double t = 0;
         pace = Math.abs(pace);
         while(!path.isComplete()){
-            Pose2D point = path.getPoint(t);
-            goToPointLinearNoStop(point.getX(DistanceUnit.INCH),point.getY(DistanceUnit.INCH), point.getHeading(AngleUnit.DEGREES));
+            double[] point = path.getPoint(t);
+            goToPointLinear(point[0],point[1], point[2]);
             t += pace;
         }
         drive(0,0,0,0);
