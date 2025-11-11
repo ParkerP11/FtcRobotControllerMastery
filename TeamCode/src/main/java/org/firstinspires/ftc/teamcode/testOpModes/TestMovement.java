@@ -24,6 +24,14 @@ public class TestMovement extends LinearOpMode {
         ad.getPath(0).addSpline(0,0,180,90);
 
         waitForStart();
+        double[] points = new double[100];
+        for(int i = 0; i < 100; i++){
+            double x1 = ad.getPath(0).getPoint(i/100).getX(DistanceUnit.INCH);
+            double x2 = ad.getPath(0).getPoint((i+1)/100).getX(DistanceUnit.INCH);
+            double y1 = ad.getPath(0).getPoint(i/100).getY(DistanceUnit.INCH);
+            double y2 = ad.getPath(0).getPoint((i+1)/100).getY(DistanceUnit.INCH);
+            points[i] = Math.hypot(x1-x2, y1-y2);
+        }
 
         ad.runPath(0);
 
