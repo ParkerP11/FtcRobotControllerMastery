@@ -87,7 +87,7 @@ public class AutonomousDrive {
 
     private static DcMotorControllerEx motorControllerEx;
 
-    private static double[] motorCurrents = new double[4];
+    private double[] motorCurrents = new double[4];
 
     //Gobilda Pinpoint
     private String odoName = "odo";
@@ -121,8 +121,8 @@ public class AutonomousDrive {
 
     //Background Varables
 
-    public static double timeLimit = 0;
-    public static boolean outInfo = true;
+    public double timeLimit = 0;
+    public boolean outInfo = true;
 
 
     //Control hub and Expasion hub lnynx modules
@@ -358,7 +358,7 @@ public class AutonomousDrive {
 
     //Set Limit to 0 if you don't want a time limit
     //Default is 0
-    public static void setTimeLimit(double time){
+    public  void setTimeLimit(double time){
         timeLimit = time;
     }
 
@@ -393,6 +393,9 @@ public class AutonomousDrive {
 
 
     public double turnSlope(double targetHeading, double startHeading, double currentDist, double startDist){
+        if(Math.abs(startHeading - targetHeading) > 180){
+            startHeading = 360 - Math.min(360,startHeading);
+        }
         return ((startHeading-targetHeading)/startDist) * (currentDist - startDist) + startHeading;
     }
 
@@ -652,9 +655,10 @@ public class AutonomousDrive {
     }
 
 
-    public void createPath(ArrayList<Pose2D> points, ArrayList<Double> weights){
-        Path path = new Path(this, opMode, points, weights);
+    public Path createPath(Pose2D startPose, double startTangent){
+        Path path = new Path(this, opMode, startPose,startTangent);
         paths.add(path);
+        return path;
     }
 
     public Path getPath(int index){
