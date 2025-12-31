@@ -9,7 +9,7 @@ import java.util.Arrays;
 public class Robot {
     public static LinearOpMode opMode;
 
-    public static AutonomousDrive ad;
+    public static AutonomousDrive ad2;
 
     public static GoBildaPinpointDriver odo;
 
@@ -19,6 +19,10 @@ public class Robot {
 
     public static ArtTracker artTrack;
 
+    public static Outtake outtake;
+
+    public static Indexer indexer;
+
     public static DcMotorEx lf, lb, rb, rf;
     public static DcMotorEx[] motors = new DcMotorEx[4];
 
@@ -26,10 +30,27 @@ public class Robot {
 
     public static HuskyLens huskyLens;
 
+    public static double[] targetPosRed = new double[]{60,-60,41};
+    public static double[] targetPosBlue = new double[]{60,60,41};
+
+
+    //Zones the color can't go
+    public static double[][] noGoZoneRed = new double[][] {{5,-40}, {-72,-40}};
+    public static double[][] noGoZoneBlue = new double[][] {{5,40}, {-72,40}};
+
+
+    //Blue Side is 0 and Red is 1
+    public static int side = 0;
+
     /*Colors are
     0 --> no color
     1 --> Purple
     2 --> Green
+
+    Sides
+    -1 --> No Side
+    0 --> Blue
+    1 --> Red
      */
 
 
@@ -37,15 +58,20 @@ public class Robot {
         opMode = opMode1;
         intitDrive(opMode1);
 
-        ad = new AutonomousDrive(opMode1);
+        ad2 = new AutonomousDrive(opMode1);
 
-        odo = ad.getPinPoint();
+        odo = ad2.getPinPoint();
 
         intake = new Intake(opMode1);
 
         c = new Controller(opMode1);
 
         artTrack = new ArtTracker(opMode1);
+
+        outtake = new Outtake(opMode1, false, 0);
+
+        indexer = new Indexer(opMode1);
+
     }
 
     public static void intitDrive(LinearOpMode opMode1){
@@ -67,7 +93,7 @@ public class Robot {
    public static void setIntake(int color) {
        if (!intake.wheelsRunning) {
            if (c.pad2.right_bumper && ! c.pad2Prev.right_bumper) {
-               intake.intakeBall(color);
+               intake.intakeBall(true);
            }
        } else if (intake.wheelsRunning) {
            if (c.pad2.right_bumper && !c.pad2Prev.right_bumper) {
@@ -87,7 +113,7 @@ public class Robot {
 
         if ((Math.abs(c.pad1.left_stick_y) > 0.05 || Math.abs(c.pad1.left_stick_x) > 0.05 || Math.abs(c.pad1.right_stick_x) > 0.05)
                 && opMode.opModeIsActive()) {
-            double currentHeadingRad = Math.toRadians(ad.getHeadingNorm());
+            double currentHeadingRad = Math.toRadians(ad2.getHeadingNorm());
 
             double v1 = 0;// lf
             double v2 = 0; // rf
@@ -102,7 +128,7 @@ public class Robot {
             double rotX = x * Math.cos(-currentHeadingRad) - y * Math.sin(-currentHeadingRad);
             double rotY = x * Math.sin(-currentHeadingRad) + y * Math.cos(-currentHeadingRad);
 
-            rotX = rotX * ad.STRAFE_RATIO;  // Counteract imperfect strafing
+            rotX = rotX * ad2.STRAFE_RATIO;  // Counteract imperfect strafing
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
