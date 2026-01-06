@@ -74,6 +74,8 @@ public class Robot {
 
     }
 
+
+
     public static void intitDrive(LinearOpMode opMode1){
         lf = opMode1.hardwareMap.get(DcMotorEx.class, "lf");
         lb = opMode1.hardwareMap.get(DcMotorEx.class, "lb");

@@ -18,9 +18,11 @@ public class Outtake{
 
     double restPose = 0;
 
-    double loadPose = 1;
+    double loadPose = 0;
+    double launchPose = 1;
 
     boolean loadedBall = false;
+    boolean loaderInIndex  = false;
 
     int launchSpeedDiffRange = 500;
 
@@ -38,7 +40,7 @@ public class Outtake{
     double launchSpeed1 = 1112;
     double launchSpeed2 = 1210;
     double launchSpeed3 = 2010;
-
+    double loaderStartTime = 0;
 
     public Outtake(LinearOpMode opMode, boolean isTelop, int side){
         this.opMode = opMode;
@@ -51,6 +53,7 @@ public class Outtake{
         if(!isTelop) {
             loader.setPosition(restPose);
             headingServo.setPosition(0.5);
+            opMode.sleep(500);
         }
     }
 
@@ -108,15 +111,14 @@ public class Outtake{
     }
 
     public void loadBall(){
-        double pose = loader.getPosition() + ONE_SERVO_REV;
-        pose = Math.max(0, Math.min(1,pose));
-        loader.setPosition(pose);
+        loader.setPosition(launchPose);
         indexer.stopIndexer();
         loadedBall = true;
+        loaderStartTime = opMode.getRuntime();
     }
 
     public void resetServo(){
-        loader.setPosition(0);
+        loader.setPosition(loadPose);
         indexer.indexerMotor.setPower(0);
         indexer.indexerisMoving = false;
     }
@@ -273,8 +275,10 @@ public class Outtake{
 
 
     public void upDateOuttake(){
-        if(ballLaunched()){
+        if(loadedBall && (opMode.getRuntime() - loaderStartTime) > 0.5){
             loadedBall = false;
+        }else if(loadedBall && (opMode.getRuntime() - loaderStartTime) > 0.25){
+            loader.setPosition(loadPose);
         }
         if(loader.getPosition() >= 0.9 && !loadedBall &&!indexer.indexerisMoving){
             resetServo();
