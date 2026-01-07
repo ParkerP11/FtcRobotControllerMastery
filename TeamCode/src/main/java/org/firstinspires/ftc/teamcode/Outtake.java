@@ -162,7 +162,7 @@ public class Outtake{
     public boolean checkPose(){
         return (Math.abs(ad2.getY()) - 5 >= ad2.getX() || -Math.abs(ad2.getY()) - 48 <= ad2.getX());
     }
-    public void launchBall() {
+    public void launchBallTelop() {
         /*
         if(opMode.gamepad2.a){
             setMotorsSpeed(launchSpeed);
@@ -257,6 +257,116 @@ public class Outtake{
                 }
             }
         } else if (opMode.gamepad2.y) {        // launches green
+            setMotorsSpeed(getTargetLaunchSpeed());
+            if (!indexer.isEmpty()) {
+                if(!loadedBall){
+                    int index = indexer.getShortestDisttoOuttake(1);
+                    indexer.getIndexerAtOuttake(index);
+                    if(!indexer.indexerisMoving && checkPose() && motorsatLaunchSpeed(getTargetLaunchSpeed())){
+                        loadBall();
+                    }
+                }
+            }
+        } else {
+            setMotorsSpeed(0);
+        }
+    }
+
+    public void launchBall(int color) {
+        /*
+        if(opMode.gamepad2.a){
+            setMotorsSpeed(launchSpeed);
+            int[] allowedColors = intake.getNeededMotifColors();
+            int targetColor = 0;
+            if(allowedColors[0] > 0){
+                targetColor = 2;
+            }else if(allowedColors[1] > 0){
+                targetColor = 1;
+            }
+            if(targetColor > 0) {
+                int index = indexer.getShortestDisttoOuttake(targetColor);
+                if (index >= 0) {
+                    if (motorsAtSpeed(launchSpeed) && indexer.getIndexerAtOuttake(index)) {
+                        indexer.stopIndexer();
+                        if (!loadedBall) {
+                            loadBall();
+                            loadedBall = true;
+                        }
+                    } else {
+                        indexer.moveIndexer(index, false);
+                    }
+                }
+            }
+            else{
+                resetServo();
+            }
+        }else if(opMode.gamepad2.x){
+            setMotorsSpeed(launchSpeed);
+
+            int index = indexer.getShortestDisttoOuttake(0);
+            if(index >= 0) {
+                if (motorsAtSpeed(launchSpeed) && indexer.getIndexerAtOuttake(index)) {
+                    indexer.stopIndexer();
+                    if (!loadedBall) {
+                        loadBall();
+                        loadedBall = true;
+                    }
+                } else {
+                    indexer.moveIndexer(index, false);
+                }
+            }
+        }else{
+            setMotorsSpeed(0);
+            resetServo();
+        }
+
+        if(ballLaunched()){
+            loadedBall = false;
+        }
+        launchSpeedPrev = getMeanLaunchSpeed();
+
+         */
+
+        upDateOuttake();
+        if (color == 0) {      //launches motif
+            setMotorsSpeed(getTargetLaunchSpeed());
+            if (indexer.hasMotif()) {
+                if(!loadedBall){
+                    indexer.indexMotif(motifIndex);
+                    if(!indexer.indexerisMoving && checkPose() && motorsatLaunchSpeed(getTargetLaunchSpeed())){
+                        loadBall();
+                    }
+                }
+            }
+        } else if (color == -1) {        //launches all balls
+            setMotorsSpeed(getTargetLaunchSpeed());
+            if (!indexer.isEmpty()) {
+                if(!loadedBall){
+                    int[] indexes = indexer.getClosesttoOuttake();
+                    if(indexer.slots[indexes[0]][0] > 0){
+                        indexer.getIndexerAtOuttake(indexes[0]);
+                    }else  if(indexer.slots[indexes[1]][0] > 0){
+                        indexer.getIndexerAtOuttake(indexes[1]);
+                    }else if(indexer.slots[indexes[2]][0] > 0){
+                        indexer.getIndexerAtOuttake(indexes[2]);
+                    }
+                    if(!indexer.indexerisMoving && checkPose() && motorsatLaunchSpeed(getTargetLaunchSpeed())){
+                        loadBall();
+                    }
+                }
+            }
+        } else if (color == 1) {        // launches purple
+            setMotorsSpeed(getTargetLaunchSpeed());
+            if (!indexer.isEmpty()) {
+                if(!loadedBall){
+                    int index = indexer.getShortestDisttoOuttake(1);
+                    indexer.getIndexerAtOuttake(index);
+                    if(!indexer.indexerisMoving && checkPose() && motorsatLaunchSpeed(getTargetLaunchSpeed())){
+                        loadBall();
+                    }
+                }
+            }
+        } else if (color == 2) {        // launches green
             setMotorsSpeed(getTargetLaunchSpeed());
             if (!indexer.isEmpty()) {
                 if(!loadedBall){

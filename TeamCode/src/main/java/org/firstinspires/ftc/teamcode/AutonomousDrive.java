@@ -257,6 +257,16 @@ public class AutonomousDrive {
         return lf;
     }
 
+    public void resetOdo(LinearOpMode opMode, double x, double y, double heading){ // left is 8.5x and 36y // right is __x and __y
+        odo.recalibrateIMU();
+        opMode.sleep(500);
+        odo.resetPosAndIMU();
+        opMode.sleep(400);
+        odo.setPosition(new Pose2D(DistanceUnit.INCH,x,y,AngleUnit.DEGREES, heading));
+        opMode.sleep(400);
+    }
+
+
     public Pose2D getPos(){return  odo.getPosition(); }
     public double getX(){return  -odo.getPosition().getX(DistanceUnit.INCH); }
     public double getY(){return  odo.getPosition().getY(DistanceUnit.INCH); }

@@ -23,6 +23,8 @@ public class Robot {
 
     public static Indexer indexer;
 
+    public static DriverAutos da;
+
     public static DcMotorEx lf, lb, rb, rf;
     public static DcMotorEx[] motors = new DcMotorEx[4];
 
@@ -71,6 +73,8 @@ public class Robot {
         outtake = new Outtake(opMode1, false, 0);
 
         indexer = new Indexer(opMode1);
+
+        da = new DriverAutos(opMode1);
 
     }
 

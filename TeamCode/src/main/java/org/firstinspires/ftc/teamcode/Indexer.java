@@ -162,18 +162,7 @@ public class Indexer {
 
     public double getAngleToGo(double targetHeading, double currentHeading){
         targetHeading = Math.abs(targetHeading) % 360;
-
-        double angleTogo = targetHeading - currentHeading;
-
-        angleTogo = targetHeading - currentHeading;
-
-        if(Math.abs(angleTogo) > 180) {
-            if (currentHeading < 180) {
-                angleTogo = -((currentHeading) + (360 - targetHeading));
-            } else {
-                angleTogo = (targetHeading + (360 - currentHeading));
-            }
-        }
+        double angleTogo = targetHeading + currentHeading;
         return angleTogo;
     }
 
