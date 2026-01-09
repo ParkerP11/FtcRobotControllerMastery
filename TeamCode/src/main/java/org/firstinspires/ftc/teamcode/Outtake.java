@@ -328,7 +328,7 @@ public class Outtake{
          */
 
         upDateOuttake();
-        if (color == 0) {      //launches motif
+        if (color == -1) {      //launches motif
             setMotorsSpeed(getTargetLaunchSpeed());
             if (indexer.hasMotif()) {
                 if(!loadedBall){
@@ -338,18 +338,12 @@ public class Outtake{
                     }
                 }
             }
-        } else if (color == -1) {        //launches all balls
+        } else if (color == 0) {        //launches all balls
             setMotorsSpeed(getTargetLaunchSpeed());
             if (!indexer.isEmpty()) {
                 if(!loadedBall){
-                    int[] indexes = indexer.getClosesttoOuttake();
-                    if(indexer.slots[indexes[0]][0] > 0){
-                        indexer.getIndexerAtOuttake(indexes[0]);
-                    }else  if(indexer.slots[indexes[1]][0] > 0){
-                        indexer.getIndexerAtOuttake(indexes[1]);
-                    }else if(indexer.slots[indexes[2]][0] > 0){
-                        indexer.getIndexerAtOuttake(indexes[2]);
-                    }
+                    int index = indexer.getShortestDisttoOuttake(0);
+                    indexer.moveIndexer(index, false);
                     if(!indexer.indexerisMoving && checkPose() && motorsatLaunchSpeed(getTargetLaunchSpeed())){
                         loadBall();
                     }

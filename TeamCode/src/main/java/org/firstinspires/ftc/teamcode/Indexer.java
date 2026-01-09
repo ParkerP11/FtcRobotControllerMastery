@@ -25,12 +25,12 @@ public class Indexer {
     public DcMotorEx indexerMotor;
 
     
-    int offset = (int)((TICKS_PER_REV/360) * 120);
+    int offset = (int)((TICKS_PER_REV/3));
     
-    double outtakeAngle = 45;
-    double intakeAngle = 315;
+    double outtakeAngle = 437;
+    double intakeAngle = 0;
 
-    double[][] slots = new double[3][4];
+    int[][] slots = new int[3][4];
 
     int[][] motifPatterns = new int[][]{{1,1,2}, {1,2,1}, {2,1,1}};
 
@@ -65,7 +65,7 @@ public class Indexer {
 
         updateSlots();
 
-        loaclizeIndexer();
+        //loaclizeIndexer();
     }
 
     public void loaclizeIndexer(){
@@ -91,6 +91,9 @@ public class Indexer {
         indexerMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         indexerMotor.setPower(0);
     }
+    public int getCurrentRotation(){
+        return (int)(Math.floor(indexerMotor.getCurrentPosition() / TICKS_PER_REV));
+    }
 
     public void setMotif(int motifNum){
         motif = motifPatterns[motifNum];
@@ -109,19 +112,19 @@ public class Indexer {
     public void moveIndexer(int index, boolean atIntake){
         if(atIntake){
             updateSlots();
-            double angleDiff = slots[index][2];
-            moveIndexerHelper(angleDiff);
+            int target = (int)(getCurrentRotation() * TICKS_PER_REV + intakeAngle);
+            moveIndexerHelper(target, slots[index][2]);
         }else {
             updateSlots();
-            double angleDiff = slots[index][3];
-            moveIndexerHelper(angleDiff);
+            int target = (int)(getCurrentRotation() * TICKS_PER_REV + outtakeAngle);
+            moveIndexerHelper(target, slots[index][3]);
         }
     }
 
-    private void moveIndexerHelper(double angle){
-        if(outtake.loaderAtRest()) {
-            int pose = indexerMotor.getCurrentPosition();
-            indexerMotor.setTargetPosition(pose + (int) (angle / 360.0 * TICKS_PER_REV));
+    private void moveIndexerHelper(int targetPose, int currentPose){
+        if(outtake.loaderAtRest() && Math.abs(targetPose -currentPose) > 5) {
+            int dist = targetPose - currentPose;
+            indexerMotor.setTargetPosition(indexerMotor.getCurrentPosition() + dist);
             indexerisMoving = true;
             indexerMotor.setPower(indexPower);
             updateSlots();
@@ -129,29 +132,44 @@ public class Indexer {
             indexerisMoving = false;
             outtake.setLoaderNearestRest();
             indexerMotor.setPower(0);
+            updateSlots();
         }
     }
 
     public void updateSlots(){
         int pose = indexerMotor.getCurrentPosition();
 
-        slots[0][1] = getAngle(pose);
-        slots[1][1] = getAngle(pose + offset);
-        slots[2][1] = getAngle(pose + 2 * offset);
+        slots[0][1] = pose;
+        slots[1][1] = pose + offset;
+        slots[2][1] = pose + 2 * offset;
 
-        slots[0][2] = getAngleToGo(intakeAngle, slots[0][1]);
-        slots[1][2] = getAngleToGo(intakeAngle, slots[1][1]);
-        slots[2][2] = getAngleToGo(intakeAngle, slots[2][1]);
+        slots[0][2] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToIntake((int)(slots[0][1] % TICKS_PER_REV)));
+        slots[1][2] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToIntake((int)(slots[1][1] % TICKS_PER_REV)));
+        slots[2][2] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToIntake((int)(slots[2][1] % TICKS_PER_REV)));
 
-        slots[0][3] = getAngleToGo(outtakeAngle, slots[0][1]);
-        slots[1][3] = getAngleToGo(outtakeAngle, slots[1][1]);
-        slots[2][3] = getAngleToGo(outtakeAngle, slots[2][1]);
+        slots[0][3] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToOuttake((int)(slots[0][1] % TICKS_PER_REV)));
+        slots[1][3] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToOuttake((int)(slots[1][1] % TICKS_PER_REV)));
+        slots[2][3] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToOuttake((int)(slots[2][1] % TICKS_PER_REV)));
     }
 
     public void updateSlotColor(int index, int ballColor){
         slots[index][0] = ballColor;
     }
 
+    public double getDistToIntake(int pose){
+        if(pose > intakeAngle){
+           return  intakeAngle + (TICKS_PER_REV - pose);
+        }else {
+            return intakeAngle - pose;
+        }
+    }
+    public double getDistToOuttake(int pose){
+        if(pose > outtakeAngle){
+            return  outtakeAngle + (TICKS_PER_REV - pose);
+        }else {
+            return outtakeAngle - pose;
+        }
+    }
     public double getAngle(int ticks){
         if(ticks >= 0){
             return (ticks % TICKS_PER_REV)/360.0;
@@ -175,9 +193,9 @@ public class Indexer {
     }
 
     public int getShortestDisttoIntake(){
-        double angle1 = Math.abs(slots[0][2]);
-        double angle2 = Math.abs(slots[1][2]);
-        double angle3 = Math.abs(slots[2][2]);
+        double angle1 = Math.abs(intakeAngle - slots[0][1]);
+        double angle2 = Math.abs(intakeAngle - slots[1][1]);
+        double angle3 = Math.abs(intakeAngle - slots[2][1]);
 
         int[] order = new int[3];
         if(angle1 <= angle2 && angle1 <= angle3){
@@ -221,11 +239,12 @@ public class Indexer {
     }
 
     public int getShortestDisttoOuttake(int ballColor){
-        double angle1 = Math.abs(slots[0][3]);
-        double angle2 = Math.abs(slots[1][3]);
-        double angle3 = Math.abs(slots[2][3]);
+        double angle1 = Math.abs(outtakeAngle - slots[0][1]);
+        double angle2 = Math.abs(outtakeAngle - slots[1][1]);
+        double angle3 = Math.abs(outtakeAngle - slots[2][1]);
 
         int[] order = new int[3];
+
         if(angle1 <= angle2 && angle1 <= angle3){
             order[0] = 0;
             if(angle2 <= angle3){
@@ -256,11 +275,11 @@ public class Indexer {
         }
 
         if(ballColor == 0){
-            if(slots[order[0]][0]  > 0){
+            if(slots[order[0]][0]  >= 0){
                 return order[0];
-            }else if(slots[order[1]][0]  > 0){
+            }else if(slots[order[1]][0]  >= 0){
                 return order[1];
-            }else if(slots[order[2]][0]  > 0){
+            }else if(slots[order[2]][0]  >= 0){
                 return order[2];
             }else{
                 return -1;
