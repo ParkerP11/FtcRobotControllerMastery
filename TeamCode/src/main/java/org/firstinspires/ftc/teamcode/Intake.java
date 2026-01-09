@@ -22,6 +22,8 @@ public class Intake {
 
     int motifNum = 0;
 
+    int ballColoratIntake = 0;
+
 
     public Intake(LinearOpMode opMode){
         this.opMode = opMode;
@@ -76,11 +78,12 @@ public class Intake {
             int index = indexer.getShortestDisttoIntake();
             if(index >= 0) {
                 if (indexer.getIndexerAtIntake(index)) {
-                    int ballcolor = checkBalColor();
+                    int ballcolor = getBallColorAtSlot();
                     if ((ballcolor == 1 && allowedColors[1] > 0) || (ballcolor == 2 && allowedColors[0] > 0)) {
                         if (isBallInSlot()) {
-                            runWheels(0);
+                            runWheels(1);
                             indexer.updateSlotColor(index, ballcolor);
+                            ballColoratIntake = 0;
                         } else {
                             runWheels(1);
                         }
@@ -99,12 +102,14 @@ public class Intake {
 
         }else{
             int index = indexer.getShortestDisttoIntake();
+            ballColoratIntake = getColor();
             if(index >= 0) {
                 if (indexer.getIndexerAtIntake(index)) {
                     if (isBallInSlot()) {
                         int ballcolor = getBallColorAtSlot();
-                        runWheels(0);
+                        runWheels(1);
                         indexer.updateSlotColor(index, ballcolor);
+                        ballColoratIntake = 0;
                     } else {
                         runWheels(1);
                     }
@@ -135,12 +140,6 @@ public class Intake {
     }
 
     public int getBallColorAtSlot(){
-        int[] diffcolor = new int[]{colorSens3.red() , colorSens3.green(),colorSens3.blue()};
-        if(diffcolor[0] > PURPLE[0] && diffcolor[1] > PURPLE[1] && diffcolor[2] > PURPLE[2]){
-            return 1;
-        }else if(diffcolor[0] > GREEN[0] && diffcolor[1] > GREEN[1] && diffcolor[2] > GREEN[2]){
-            return 2;
-        }
-        return 0;
+        return ballColoratIntake;
     }
 }
