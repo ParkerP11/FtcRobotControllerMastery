@@ -136,7 +136,7 @@ public class Indexer {
            indexerMotor.setPower(0);
        }else{
            int target = getCurrentRotationCeil();
-           target = (int)(target*TICKS_PER_REV + targetPose  - index * offset);
+           target = (int)(targetPose  - index * offset);
            indexerMotor.setTargetPosition(target);
            indexerMotor.setPower(0.35);
            indexerisMoving = true;
