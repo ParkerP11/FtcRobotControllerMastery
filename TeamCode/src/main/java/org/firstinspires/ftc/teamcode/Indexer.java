@@ -120,8 +120,8 @@ public class Indexer {
     public void moveIndexer(int index, boolean atIntake){
             if(atIntake){
                 updateSlots();
-                int target = (int)(getCurrentRotation() * TICKS_PER_REV + intakeAngle);
-                moveIndexerHelper(target, slots[index][2]);
+                double target = outtakeAngle + getCurrentRotationCeil() * TICKS_PER_REV;
+                moveIndexerHelper(target, index);
             }else {
                 updateSlots();
                 double target = outtakeAngle + getCurrentRotationCeil() * TICKS_PER_REV;
@@ -150,32 +150,26 @@ public class Indexer {
         slots[1][1] = pose + offset;
         slots[2][1] = pose + 2 * offset;
 
-        slots[0][2] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToIntake((int)(slots[0][1] % TICKS_PER_REV)));
-        slots[1][2] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToIntake((int)(slots[1][1] % TICKS_PER_REV)));
-        slots[2][2] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToIntake((int)(slots[2][1] % TICKS_PER_REV)));
+        slots[0][2] = (int)(getDistToIntake(0));
+        slots[1][2] = (int)(getDistToIntake(1));
+        slots[2][2] = (int)(getDistToIntake(2));
 
-        slots[0][3] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToOuttake((int)(slots[0][1] % TICKS_PER_REV)));
-        slots[1][3] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToOuttake((int)(slots[1][1] % TICKS_PER_REV)));
-        slots[2][3] = (int)(getCurrentRotation() * TICKS_PER_REV + getDistToOuttake((int)(slots[2][1] % TICKS_PER_REV)));
+        slots[0][3] = (int)(getDistToOuttake(0));
+        slots[1][3] = (int)(getDistToOuttake(1));
+        slots[2][3] = (int)(getDistToOuttake(2));
     }
 
     public void updateSlotColor(int index, int ballColor){
         slots[index][0] = ballColor;
     }
 
-    public double getDistToIntake(int pose){
-        if(pose > intakeAngle){
-           return  intakeAngle + (TICKS_PER_REV - pose);
-        }else {
-            return intakeAngle - pose;
-        }
+    public double getDistToIntake(int index){
+        int target = getCurrentRotationCeil();
+        return (target*TICKS_PER_REV - index * offset);
     }
-    public double getDistToOuttake(int pose){
-        if(pose > outtakeAngle){
-            return  outtakeAngle + (TICKS_PER_REV - pose);
-        }else {
-            return outtakeAngle - pose;
-        }
+    public double getDistToOuttake(int index){
+        int target = getCurrentRotationCeil();
+        return (target*TICKS_PER_REV + outtakeAngle - index * offset);
     }
     public double getAngle(int ticks){
         if(ticks >= 0){
