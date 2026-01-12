@@ -95,6 +95,14 @@ public class Indexer {
         return (int)(Math.floor(indexerMotor.getCurrentPosition() / TICKS_PER_REV));
     }
 
+    public int getCurrentRotationCeil(){
+        return (int)(Math.ceil(indexerMotor.getCurrentPosition() / TICKS_PER_REV));
+    }
+
+    public double getPoseNormalIzed(){
+        return (indexerMotor.getCurrentPosition() % TICKS_PER_REV);
+    }
+
     public void setMotif(int motifNum){
         motif = motifPatterns[motifNum];
     }
@@ -110,30 +118,29 @@ public class Indexer {
     }
 
     public void moveIndexer(int index, boolean atIntake){
-        if(atIntake){
-            updateSlots();
-            int target = (int)(getCurrentRotation() * TICKS_PER_REV + intakeAngle);
-            moveIndexerHelper(target, slots[index][2]);
-        }else {
-            updateSlots();
-            int target = (int)(getCurrentRotation() * TICKS_PER_REV + outtakeAngle);
-            moveIndexerHelper(target, slots[index][3]);
-        }
+            if(atIntake){
+                updateSlots();
+                int target = (int)(getCurrentRotation() * TICKS_PER_REV + intakeAngle);
+                moveIndexerHelper(target, slots[index][2]);
+            }else {
+                updateSlots();
+                double target = outtakeAngle + getCurrentRotationCeil() * TICKS_PER_REV;
+                moveIndexerHelper(target, index);
+            }
+
     }
 
-    private void moveIndexerHelper(int targetPose, int currentPose){
-        if(outtake.loaderAtRest() && Math.abs(targetPose -currentPose) > 5) {
-            int dist = targetPose - currentPose;
-            indexerMotor.setTargetPosition(indexerMotor.getCurrentPosition() + dist);
-            indexerisMoving = true;
-            indexerMotor.setPower(indexPower);
-            updateSlots();
-        }else{
-            indexerisMoving = false;
-            outtake.setLoaderNearestRest();
-            indexerMotor.setPower(0);
-            updateSlots();
-        }
+    private void moveIndexerHelper(double targetPose, int index){
+       if(Math.abs(indexerMotor.getTargetPosition() - indexerMotor.getCurrentPosition()) < 5){
+           indexerisMoving = false;
+           indexerMotor.setPower(0);
+       }else{
+           int target = getCurrentRotationCeil();
+           target = (int)(target*TICKS_PER_REV + targetPose  - index * offset);
+           indexerMotor.setTargetPosition(target);
+           indexerMotor.setPower(0.35);
+           indexerisMoving = true;
+       }
     }
 
     public void updateSlots(){
