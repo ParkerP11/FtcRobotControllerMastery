@@ -120,7 +120,7 @@ public class Indexer {
     public void moveIndexer(int index, boolean atIntake){
             if(atIntake){
                 updateSlots();
-                double target = outtakeAngle + getCurrentRotationCeil() * TICKS_PER_REV;
+                double target = intakeAngle + getCurrentRotationCeil() * TICKS_PER_REV;
                 moveIndexerHelper(target, index);
             }else {
                 updateSlots();
