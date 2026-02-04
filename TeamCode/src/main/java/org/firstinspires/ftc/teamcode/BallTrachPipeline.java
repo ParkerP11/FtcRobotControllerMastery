@@ -112,31 +112,38 @@ public class BallTrachPipeline extends OpenCvPipeline {
 
 
     public ArrayList<Integer> getArtdistX(int color){
+        ArrayList<Integer> out = new ArrayList<>();
         if(color == 1){
-            ArrayList<Integer> out = new ArrayList<>();
-            for(int i = 0; i < ballCentersP.size(); i++){
-                int xdist = (int)(ballCentersP.get(i).x - (SCREEN_WIDTH/2.0));
-                out.add(xdist);
+            if(ballCentersP.size() > 0) {
+                for (int i = 0; i < ballCentersP.size(); i++) {
+                    int xdist = (int) (ballCentersP.get(i).x - (SCREEN_WIDTH / 2.0));
+                    out.add(xdist);
+                }
             }
             return  out;
         }else if(color == 2){
-            ArrayList<Integer> out = new ArrayList<>();
-            for(int i = 0; i < ballCentersG.size(); i++){
-                int xdist = (int)(ballCentersG.get(i).x - (SCREEN_WIDTH/2.0));
-                out.add(xdist);
+            if(ballCentersG.size() > 0) {
+                for (int i = 0; i < ballCentersG.size(); i++) {
+                    int xdist = (int) (ballCentersG.get(i).x - (SCREEN_WIDTH / 2.0));
+                    out.add(xdist);
+                }
             }
 
             return  out;
         }
         else{
-            ArrayList<Integer> out = new ArrayList<>();
-            for(int i = 0; i < ballCentersG.size(); i++){
-                int xdist = (int)(ballCentersG.get(i).x - (SCREEN_WIDTH/2.0));
-                out.add(xdist);
+
+            if(ballCentersG.size() > 0) {
+                for (int i = 0; i < ballCentersG.size(); i++) {
+                    int xdist = (int) (ballCentersG.get(i).x - (SCREEN_WIDTH / 2.0));
+                    out.add(xdist);
+                }
             }
-            for(int i = 0; i < ballCentersP.size(); i++){
-                int xdist = (int)(ballCentersP.get(i).x - (SCREEN_WIDTH/2.0));
-                out.add(xdist);
+            if(ballCentersP.size() > 0) {
+                for (int i = 0; i < ballCentersP.size(); i++) {
+                    int xdist = (int) (ballCentersP.get(i).x - (SCREEN_WIDTH / 2.0));
+                    out.add(xdist);
+                }
             }
             return  out;
         }
